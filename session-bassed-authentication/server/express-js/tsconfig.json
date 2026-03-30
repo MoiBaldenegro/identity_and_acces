@@ -15,7 +15,7 @@
     "strict": true,
     "esModuleInterop": true,
     "skipDefaultLibCheck": true,
-    "verbatimModuleSyntax": true,
+    "verbatimModuleSyntax": false,
     "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
