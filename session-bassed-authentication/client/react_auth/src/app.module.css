@@ -1,0 +1,6 @@
+/* src/presentation/App.module.css */
+.app {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
