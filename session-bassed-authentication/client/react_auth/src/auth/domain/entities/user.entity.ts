@@ -9,6 +9,8 @@ export interface User {
 
 export interface UserEntity {
   getFullName: () => string;
+  getUserId: () => string;
+  getUserEmail: () => string;
 }
 
 export function createUser(id: string, email: string, firstName?: string, lastName?: string): UserEntity {
@@ -20,11 +22,19 @@ export function createUser(id: string, email: string, firstName?: string, lastNa
         lastName
     };
 
-    function getFullName(): string {
-        return [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email;
-    }   
+    const getFullName = () => {
+        if (user.firstName && user.lastName) {
+            return `${user.firstName} ${user.lastName}`;
+        }
+        return user.email;
+    };
+
+    const getUserId = () => user.id;
+    const getUserEmail = () => user.email;
 
     return {
-        getFullName
+        getFullName,
+        getUserId,
+        getUserEmail
     };
 }

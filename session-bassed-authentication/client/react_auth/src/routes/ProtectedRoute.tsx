@@ -1,14 +1,14 @@
 // src/presentation/router/ProtectedRoute.tsx
-import { ReactNode, useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useAuthStore } from '../auth/presentation/store/useAuthStore';
+import { use, useEffect, type ReactNode } from 'react';
 
 interface ProtectedRouteProps {
   children: ReactNode;
 }
 
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, clearAuth } = useAuthStore();
 
   if (isLoading) {
     return <div className="loading">Cargando...</div>;
@@ -17,6 +17,6 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-
+  
   return <>{children}</>;
 };

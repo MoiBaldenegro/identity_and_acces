@@ -20,15 +20,31 @@ export class LoginUseCase {
 
   async execute(dto: LoginDtoType, ip?: string, userAgent?: string): Promise<{ sessionId: string; user: any }> {
     const emailVO = Email.create(dto.email);
-    const user = await this.userRepo.findByEmail(emailVO.value);
+    let user = await this.userRepo.findByEmail(emailVO.value);
 
     if (!user) {
       // No revelar si el email existe (prevención de enumeration)
       throw new ApplicationException('Invalid credentials', 'INVALID_CREDENTIALS');
     }
 
+    // === NUEVA LÓGICA: Verificar si ya pasó el tiempo de bloqueo ===
+    if (user.lockedUntil && user.lockedUntil < new Date()) {
+      console.log(`[Login] Liberando cuenta ${user.email} automáticamente`);
+      await this.userRepo.resetFailedAttempts(user.id);   // Esto limpia lockedUntil
+      user = await this.userRepo.findByEmail(emailVO.value); // Refrescamos el usuario
+    }
+
+   // Ahora sí verificamos si sigue bloqueada
     if (user.isAccountLocked()) {
-      throw new ApplicationException('Account is locked. Try again later.', 'ACCOUNT_LOCKED');
+      const remainingMinutes = Math.ceil(
+        (user.lockedUntil!.getTime() - Date.now()) / 60000
+      );
+
+      throw new ApplicationException(
+        `Account is locked. Try again in ${remainingMinutes} minutes.`,
+        'ACCOUNT_LOCKED',
+        429
+      );
     }
 
     const passwordVO =Password.fromHash(user.passwordHash); // en realidad solo usamos el hash

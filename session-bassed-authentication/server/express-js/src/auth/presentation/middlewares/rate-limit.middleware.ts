@@ -16,7 +16,7 @@ export const rateLimitMiddleware = {
   login: createRateLimiter(
     config.security.rateLimit.login.windowMs,
     config.security.rateLimit.login.max,
-    'Too many login attempts. Please try again later.'
+    'Too many login attempts. Please try again later RT.'
   ),
   general: () => rateLimit({
     windowMs: 60 * 1000,

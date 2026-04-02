@@ -4,38 +4,56 @@ import type { AuthPort, LoginData, RegisterData } from "../../../domain/ports/au
 import type { HttpClientPort } from "../../../domain/ports/http-client.port";
 import { getAuthConfig } from "../../../shared/config";
 
+interface UserApiResponse {
+    id: string;
+    email: {
+        value: string;
+    };
+    firstName: string;
+}
+
 
 export function authApiAdapter(httpClient: HttpClientPort): AuthPort {
 
     const {API_BASE_URL} = getAuthConfig();
 
   const register = async (data: RegisterData): Promise<{ userId: string }> => {
+    const api_url = new URL("api/auth/register", API_BASE_URL).href;
+    if(!api_url ) throw new Error("Invalid API URL");
+
     const response = await httpClient.post<{ success: boolean; userId?: string }>(
-      `${API_BASE_URL}/auth/register`,
+      api_url,
       data
     );
     return { userId: response.userId || '' };
   }
 
   const login = async (data: LoginData): Promise<UserEntity> => {
-    const response = await httpClient.post<{
-      success: boolean;
-      user: { id: string; email: string; firstName?: string; lastName?: string };
-    }>(`${API_BASE_URL}/auth/login`, data);
+    const api_url = new URL("api/auth/login", API_BASE_URL).href;
+    if(!api_url ) throw new Error("Invalid API URL");
 
-    return createUser(response.user.id, response.user.email, response.user.firstName, response.user.lastName);
+    const response  = await httpClient.post<{
+      success: boolean;
+      user: UserApiResponse;
+    }>(api_url, data);
+
+    return createUser(response.user.id, response.user.email.value, response.user.firstName, "APIMODIFY_LASTNAME");
   }
 
   const logout = async (): Promise<void> => {
-    await httpClient.post(`${API_BASE_URL}/auth/logout`, {});
+    const api_url = new URL("api/auth/logout", API_BASE_URL).href;
+    if(!api_url ) throw new Error("Invalid API URL");
+    await httpClient.post(api_url, {});
   }
 
   const getCurrentUser = async (): Promise<UserEntity | null> => {
+    const api_url = new URL("api/auth/me", API_BASE_URL).href;
+    if(!api_url ) throw new Error("Invalid API URL");
     try {
       const response = await httpClient.get<{
         success: boolean;
         userId: string;
-      }>(`${API_BASE_URL}/auth/me`);
+      }>(api_url);
 
       return createUser(response.userId, ''); 
     } catch (error) {

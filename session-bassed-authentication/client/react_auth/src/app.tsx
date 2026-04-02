@@ -1,7 +1,7 @@
 // src/presentation/App.tsx
 import "./app.module.css";
+import { AppRouter } from "./routes/AppRouter";
 
-import { AppRouter } from "./auth/presentation/router/AppRouter";
 
 function App() {
   return (
