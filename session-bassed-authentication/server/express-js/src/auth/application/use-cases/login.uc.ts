@@ -1,12 +1,14 @@
 // src/application/use-cases/login.use-case.ts
-import { LoginDtoType } from '../dtos/auth/login.dto';
-import { UserRepositoryPort } from '../../domain/repositories/user.repository.port';
-import { PasswordService } from '../../domain/services/password.service';
-import { Email } from '../../domain/value-objects/email.vo';
-import { ApplicationException } from '../../../shared/exceptions/application.exception';
-import { Password } from '../../domain/value-objects/password.vo';
-import { SessionRepositoryPort } from '../../domain/repositories/session.repository.port';
-import { User } from '../../domain/entities/user.entity';
+
+import { ApplicationException } from "../../../shared/exceptions/application.exception.js";
+import { User } from "../../domain/entities/user.entity.js";
+import { SessionRepositoryPort } from "../../domain/repositories/session.repository.port.js";
+import { UserRepositoryPort } from "../../domain/repositories/user.repository.port.js";
+import { PasswordService } from "../../domain/services/password.service.js";
+import { Email } from "../../domain/value-objects/email.vo.js";
+import { Password } from "../../domain/value-objects/password.vo.js";
+import { LoginDtoType } from "../dtos/auth/login.dto.js";
+
 
 export class LoginUseCase {
   private readonly MAX_FAILED_ATTEMPTS = 5;

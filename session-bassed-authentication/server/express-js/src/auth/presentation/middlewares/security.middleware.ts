@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 
 export const securityMiddleware = () => {
   return (req: Request, res: Response, next: NextFunction) => {
+    
     // Headers de seguridad adicionales
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');

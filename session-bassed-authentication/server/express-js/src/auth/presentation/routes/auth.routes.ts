@@ -1,10 +1,11 @@
 // src/presentation/routes/auth.routes.ts
 import { Router, Request, Response, NextFunction } from 'express';
-import { AuthController } from '../controllers/auth.controller';
-import { SessionRepositoryPort } from '../../domain/repositories/session.repository.port';
-import { rateLimitMiddleware } from '../middlewares/rate-limit.middleware';
-import { csrfMiddleware } from '../middlewares/csrf.middleware';
-import { authMiddleware } from '../middlewares/auth.middleware';
+import { AuthController } from '../controllers/auth.controller.js';
+import { SessionRepositoryPort } from '../../domain/repositories/session.repository.port.js';
+import { rateLimitMiddleware } from '../middlewares/rate-limit.middleware.js';
+import { authMiddleware } from '../middlewares/auth.middleware.js';
+import { csrfMiddleware } from '../middlewares/csrf.middleware.js';
+
 
 export default function createAuthRoutes(
   controller: AuthController,
@@ -28,7 +29,7 @@ export default function createAuthRoutes(
   // Rutas protegidas
   router.post('/logout', 
     authMiddleware(sessionRepo),
-    csrfMiddleware(sessionRepo),
+    // csrfMiddleware(sessionRepo),
     (req: Request, res: Response, next: NextFunction) => 
       controller.logout(req, res).catch(next)
   );
@@ -37,8 +38,10 @@ export default function createAuthRoutes(
   router.get('/me', 
     authMiddleware(sessionRepo),
     async (req: Request, res: Response) => {
-      const userId = (req as any).userId;
-      res.json({ success: true, userId });
+      controller.getCurrentUser(req, res).catch((err) => {
+        console.error('Error fetching current user:', err);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+      });
     }
   );
 

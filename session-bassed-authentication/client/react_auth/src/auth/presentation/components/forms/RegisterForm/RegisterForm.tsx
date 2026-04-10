@@ -1,11 +1,7 @@
-// RegisterForm.tsx
-// src/presentation/components/forms/RegisterForm/RegisterForm.tsx
 import { useState } from 'react';
 import { Button } from '../../ui/Button/Button';
 import styles from './RegisterForm.module.css';
 import { useAuthActions } from '../../../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../../../store/useAuthStore';
 
 export const RegisterForm = () => {
   const [formData, setFormData] = useState({
@@ -16,8 +12,6 @@ export const RegisterForm = () => {
     lastName: '',
   });
 
-  const navigate = useNavigate();
-
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuthActions();
@@ -25,7 +19,7 @@ export const RegisterForm = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    setError(''); // Limpiar error al escribir
+    setError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,7 +27,6 @@ export const RegisterForm = () => {
     setError('');
     setIsLoading(true);
 
-    // Validaciones básicas en frontend
     if (formData.password !== formData.confirmPassword) {
       setError('Las contraseñas no coinciden');
       setIsLoading(false);
@@ -53,14 +46,9 @@ export const RegisterForm = () => {
         firstName: formData.firstName.trim() || undefined,
         lastName: formData.lastName.trim() || undefined,
       });
-
-      // if(!isAuthenticated ) throw new Error('Error al registrar usuario es este HDP'); 
-      
-      navigate('/dashboard'); // Redirigir a la página principal después del registro
-      
-      // El hook de auth ya hace login automático y redirecciona
-    } catch (err: any) {
-      setError(err.message || 'Error al registrar usuario');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error al registrar usuario';
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -68,22 +56,26 @@ export const RegisterForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
-      <div className={styles.inputGroup}>
+      <div className={styles.row}>
         <input
           type="text"
           name="firstName"
           value={formData.firstName}
           onChange={handleChange}
-          placeholder="Nombre (opcional)"
+          placeholder="Nombre"
           className={styles.input}
+          autoComplete="given-name"
+          disabled={isLoading}
         />
         <input
           type="text"
           name="lastName"
           value={formData.lastName}
           onChange={handleChange}
-          placeholder="Apellido (opcional)"
+          placeholder="Apellido"
           className={styles.input}
+          autoComplete="family-name"
+          disabled={isLoading}
         />
       </div>
 
@@ -95,6 +87,8 @@ export const RegisterForm = () => {
         placeholder="Correo electrónico"
         className={styles.input}
         required
+        autoComplete="email"
+        disabled={isLoading}
       />
 
       <input
@@ -105,6 +99,9 @@ export const RegisterForm = () => {
         placeholder="Contraseña (mínimo 12 caracteres)"
         className={styles.input}
         required
+        autoComplete="new-password"
+        minLength={12}
+        disabled={isLoading}
       />
 
       <input
@@ -115,16 +112,33 @@ export const RegisterForm = () => {
         placeholder="Confirmar contraseña"
         className={styles.input}
         required
+        autoComplete="new-password"
+        disabled={isLoading}
       />
 
-      {error && <p className={styles.error}>{error}</p>}
+      {error && (
+        <div className={styles.error} role="alert">
+          <svg className={styles.errorIcon} viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+          </svg>
+          {error}
+        </div>
+      )}
+
+      <div className={styles.hint}>
+        <svg viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clipRule="evenodd" />
+        </svg>
+        Usa al menos 12 caracteres con mayúsculas, minúsculas y números
+      </div>
 
       <Button 
         type="submit" 
-        variant="primary" 
-        disabled={isLoading}
+        variant="secondary" 
+        isLoading={isLoading}
+        className={styles.submitBtn}
       >
-        {isLoading ? 'Registrando...' : 'Crear cuenta'}
+        Crear cuenta
       </Button>
     </form>
   );

@@ -5,13 +5,17 @@ import { LoginUseCase } from '../../application/use-cases/login.uc.js';
 import { LogoutUseCase } from '../../application/use-cases/logout.uc.js';
 import { RegisterDto } from '../../application/dtos/auth/register.dto.js';
 import { LoginDto } from '../../application/dtos/auth/login.dto.js';
+import { GetCurrentUserUseCase } from '../../application/use-cases/get-current-user.uc.js';
+import { CSRF_COOKIE_NAME } from '../middlewares/csrf.middleware.js';
+import crypto from 'crypto';
 
 
 export class AuthController {
   constructor(
     private registerUseCase: RegisterUseCase,
     private loginUseCase: LoginUseCase,
-    private logoutUseCase: LogoutUseCase
+    private logoutUseCase: LogoutUseCase,
+    private getCurrentUserUseCase: GetCurrentUserUseCase
   ) {}
 
   async register(req: Request, res: Response) {
@@ -62,4 +66,43 @@ export class AuthController {
     res.clearCookie('__Host-session');
     res.json({ success: true, message: 'Logged out successfully' });
   }
+
+
+  // src/presentation/controllers/auth.controller.ts
+async getCurrentUser(req: Request, res: Response) {
+  const userId = (req as any).userId;
+
+  if (!userId) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+
+  const user = await this.getCurrentUserUseCase.execute(userId);   // inyecta el use case
+
+  if (!user) {
+    return res.status(401).json({ success: false, message: 'User not found' });
+  }
+
+  // Devolvemos solo datos NO sensibles
+  res.json({
+    success: true,
+    user: {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    }
+  });
+}
+
+// private setCsrfToken(res: Response) {
+//   const csrfToken = crypto.randomBytes(32).toString('hex');
+
+//   res.cookie(CSRF_COOKIE_NAME, csrfToken, {
+//     httpOnly: false,           // ← Importante: frontend debe poder leerlo
+//     secure: process.env.NODE_ENV === 'production',
+//     sameSite: 'strict',
+//     maxAge: 24 * 60 * 60 * 1000,
+//     path: '/'
+//   });
+// }
 }

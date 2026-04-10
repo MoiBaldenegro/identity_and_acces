@@ -11,6 +11,16 @@ interface UserApiResponse {
     };
     firstName: string;
 }
+interface CurrentUserApiResponse {
+    id: {
+        value: string;
+    };
+    email: {
+        value: string;
+    };
+    firstName: string;
+    lastName: string;
+}
 
 
 export function authApiAdapter(httpClient: HttpClientPort): AuthPort {
@@ -52,10 +62,13 @@ export function authApiAdapter(httpClient: HttpClientPort): AuthPort {
     try {
       const response = await httpClient.get<{
         success: boolean;
-        userId: string;
+        user: CurrentUserApiResponse;
       }>(api_url);
 
-      return createUser(response.userId, ''); 
+      const { user } = response;
+      const { id, email, firstName, lastName } = user;
+
+      return createUser(id.value, email.value, firstName, lastName);
     } catch (error) {
         console.error('Error fetching current user:', error);
       return null;

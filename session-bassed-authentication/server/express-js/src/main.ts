@@ -1,13 +1,15 @@
-import { LoginUseCase } from "./auth/application/use-cases/login.uc";
-import { LogoutUseCase } from "./auth/application/use-cases/logout.uc";
-import { RegisterUseCase } from "./auth/application/use-cases/register.uc";
-import { UserPrismaRepository } from "./auth/infrastructure/adapters/persistence/prisma/user.prisma.repository";
-import { SessionRedisRepository } from "./auth/infrastructure/adapters/persistence/redis/session.redis.repository";
-import { Argon2PasswordAdapter } from "./auth/infrastructure/adapters/security/argon2.password.adapter";
-import { AuthController } from "./auth/presentation/controllers/auth.controller";
-import createAuthRoutes from "./auth/presentation/routes/auth.routes";
-import { config } from "./auth/config";
-import { createServer } from "./auth/presentation/server";
+import { LoginUseCase } from "./auth/application/use-cases/login.uc.js";
+import { LogoutUseCase } from "./auth/application/use-cases/logout.uc.js";
+import { RegisterUseCase } from "./auth/application/use-cases/register.uc.js";
+import { UserPrismaRepository } from "./auth/infrastructure/adapters/persistence/prisma/user.prisma.repository.js";
+import { SessionRedisRepository } from "./auth/infrastructure/adapters/persistence/redis/session.redis.repository.js";
+import { Argon2PasswordAdapter } from "./auth/infrastructure/adapters/security/argon2.password.adapter.js";
+import { AuthController } from "./auth/presentation/controllers/auth.controller.js";
+import createAuthRoutes from "./auth/presentation/routes/auth.routes.js";
+import { config } from "./auth/config/index.js";
+import { createServer } from "./auth/presentation/server.js";
+import { GetCurrentUserUseCase } from "./auth/application/use-cases/get-current-user.uc.js";
+
 
 
 async function bootstrap() {
@@ -34,11 +36,15 @@ async function bootstrap() {
 
     const logoutUseCase = new LogoutUseCase(sessionRepository);
 
+    const getCurrentUserUseCase = new GetCurrentUserUseCase(userRepository);
+
     // ==================== CONTROLLER ====================
     const authController = new AuthController(
       registerUseCase,
       loginUseCase,
-      logoutUseCase
+      logoutUseCase,
+      getCurrentUserUseCase
+
     );
 
     // ==================== EXPRESS SERVER ====================
@@ -53,8 +59,8 @@ async function bootstrap() {
     // Montar rutas
     app.use('/api/auth', authRouter);
 
-    const PORT = config.app.port;
-    app.listen(PORT, () => {
+      const PORT = config.app.port;
+      app.listen(PORT, () => {
       console.log(`✅ Servidor corriendo en http://localhost:${PORT}`);
       console.log(`📊 Environment: ${config.app.env}`);
       console.log(`🔐 Session store: Redis`);

@@ -1,7 +1,6 @@
 // src/presentation/middlewares/csrf.middleware.ts
 import { Request, Response, NextFunction } from 'express';
-import { SessionRepositoryPort } from '../../domain/repositories/session.repository.port';
-import crypto from 'crypto';
+import { SessionRepositoryPort } from '../../domain/repositories/session.repository.port.js';
 
 const CSRF_TOKEN_HEADER = 'x-csrf-token';
 
