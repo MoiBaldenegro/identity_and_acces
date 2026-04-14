@@ -10,6 +10,8 @@ import { config } from "./auth/config/index.js";
 import { createServer } from "./auth/presentation/server.js";
 import { GetCurrentUserUseCase } from "./auth/application/use-cases/get-current-user.uc.js";
 import { LogoutAllDevicesUseCase } from "./auth/application/use-cases/logout-all-devices-uc.js";
+import { GetUserSessionsUseCase } from "./auth/application/use-cases/get-user-sessions.uc.js";
+import { LogoutSingleDeviceUseCase } from "./auth/application/use-cases/logout-single-device.js";
 
 
 
@@ -41,14 +43,20 @@ async function bootstrap() {
 
     const logoutAllDevicesUseCase = new LogoutAllDevicesUseCase(sessionRepository);
 
+    const getUserSessionsUseCase = new GetUserSessionsUseCase(sessionRepository);
+
+
+    const logoutSingleDeviceUseCase = new LogoutSingleDeviceUseCase(sessionRepository);
+
     // ==================== CONTROLLER ====================
     const authController = new AuthController(
       registerUseCase,
       loginUseCase,
       logoutUseCase,
       getCurrentUserUseCase,
-      logoutAllDevicesUseCase
-
+      logoutAllDevicesUseCase,
+      getUserSessionsUseCase,
+      logoutSingleDeviceUseCase
     );
 
     // ==================== EXPRESS SERVER ====================

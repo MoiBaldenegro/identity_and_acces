@@ -7,6 +7,8 @@ import { RegisterDto } from '../../application/dtos/auth/register.dto.js';
 import { LoginDto } from '../../application/dtos/auth/login.dto.js';
 import { GetCurrentUserUseCase } from '../../application/use-cases/get-current-user.uc.js';
 import { LogoutAllDevicesUseCase } from '../../application/use-cases/logout-all-devices-uc.js';
+import { GetUserSessionsUseCase } from '../../application/use-cases/get-user-sessions.uc.js';
+import { LogoutSingleDeviceUseCase } from '../../application/use-cases/logout-single-device.js';
 
 
 export class AuthController {
@@ -15,7 +17,9 @@ export class AuthController {
     private loginUseCase: LoginUseCase,
     private logoutUseCase: LogoutUseCase,
     private getCurrentUserUseCase: GetCurrentUserUseCase,
-    private logoutAllDevicesUseCase: LogoutAllDevicesUseCase
+    private logoutAllDevicesUseCase: LogoutAllDevicesUseCase,
+    private getUserSessionsUseCase: GetUserSessionsUseCase,
+    private logoutSingleDeviceUseCase: LogoutSingleDeviceUseCase
   ) {}
 
   async register(req: Request, res: Response) {
@@ -49,7 +53,7 @@ export class AuthController {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: dto.rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000, // 30 días si recordarme, 1 día si no
       path: '/',
     });
 
@@ -124,6 +128,88 @@ async logoutAllDevices(req: Request, res: Response) {
     console.error('Error en logoutAllDevices:', err);
     res.status(500).json({ success: false, message: 'Error al cerrar sesiones' });
    }
+
+   
+}
+
+async getUserSessions(req: Request, res: Response) {
+  const userId = (req as any).userId;
+  const currentSessionId = (req as any).sessionId;
+
+  if (!userId) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+
+  const sessions = await this.getUserSessionsUseCase.execute(userId, currentSessionId);
+
+  res.json({
+    success: true,
+    sessions: sessions.map(session => ({
+      sessionId: session.sessionId,
+      ipAddress: session.ipAddress,
+      userAgent: session.userAgent,
+      createdAt: session.createdAt,
+      isCurrent: session.isCurrent,
+      // Parseamos el user-agent para mostrar nombre amigable
+      deviceInfo: this.parseUserAgent(session.userAgent)
+    }))
+  });
+}
+
+// Helper para mostrar un nombre más amigable del dispositivo y navegador
+private parseUserAgent(userAgent?: string): string {
+  if (!userAgent) return 'Dispositivo desconocido';
+
+  // Detección de SO
+  let os = 'Dispositivo';
+  if (userAgent.includes('Windows')) os = 'Windows';
+  else if (userAgent.includes('Macintosh')) os = 'Mac';
+  else if (userAgent.includes('Android')) os = 'Android';
+  else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) os = 'iOS';
+  else if (userAgent.includes('Linux')) os = 'Linux';
+
+  // Detección de Navegador
+  let browser = 'Desconocido';
+  // El orden es importante porque navegadores como Edge y Chrome incluyen "Safari"
+  // y Edge incluye "Chrome" en la cadena de texto cruda.
+  if (userAgent.includes('Edg/')) browser = 'Edge';
+  else if (userAgent.includes('Firefox') || userAgent.includes('FxiOS')) browser = 'Firefox';
+  else if (userAgent.includes('OPR/')) browser = 'Opera';
+  else if (userAgent.includes('Chrome') || userAgent.includes('CriOS')) browser = 'Chrome';
+  else if (userAgent.includes('Safari')) browser = 'Safari';
+
+  return `${browser} en ${os}`;
+}
+
+
+// src/presentation/controllers/auth.controller.ts
+
+async logoutSingleDevice(req: Request, res: Response) {
+  const userId = (req as any).userId;
+  const currentSessionId = (req as any).sessionId;
+  const { sessionId } = req.params;   // sessionId a eliminar
+
+  if (!userId) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+
+  if(typeof sessionId !== 'string') {
+    return res.status(400).json({ success: false, message: 'Session ID is required' });
+  }
+
+  try {
+    await this.logoutSingleDeviceUseCase.execute(userId, sessionId, currentSessionId);
+
+    res.status(200).json({
+      success: true,
+      message: 'Sesión cerrada correctamente'
+    });
+  } catch (error: any) {
+    res.status(error.statusCode || 400).json({
+      success: false,
+      message: error.message || 'Error al cerrar sesión'
+    });
+  }
 }
 
 // private setCsrfToken(res: Response) {

@@ -71,7 +71,7 @@ export class LoginUseCase {
     // MOISES: Me parece que e4sta es lñ amanera de tener al usuario logueado solo en lugar a la vez, pero no se si es buena idea eliminar todas las sesiones anteriores. Quizás solo la actual?
     // await this.sessionRepo.deleteAllForUser(user.id.value); // opcional: invalidar sesiones anteriores
 
-    const sessionId = await this.sessionRepo.create(user.id.value, ip, userAgent);
+    const sessionId = await this.sessionRepo.create(user.id.value, ip, userAgent, dto.rememberMe);
 
     // Actualizar lastLoginAt (inmutable)
     const updatedUser = new User({

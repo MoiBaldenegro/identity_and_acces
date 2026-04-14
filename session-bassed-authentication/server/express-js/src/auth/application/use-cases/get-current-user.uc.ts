@@ -3,7 +3,6 @@
 import { User } from "../../domain/entities/user.entity.js";
 import { UserRepositoryPort } from "../../domain/repositories/user.repository.port.js";
 
-
 export class GetCurrentUserUseCase {
   constructor(private readonly userRepo: UserRepositoryPort) {}
 

@@ -1,6 +1,6 @@
 // src/infrastructure/adapters/auth/auth.api.adapter.ts
 import { createUser, type UserEntity } from "../../../domain/entities/user.entity";
-import type { AuthPort, LoginData, RegisterData } from "../../../domain/ports/auth.port";
+import type { AuthPort, LoginData, RegisterData, SessionInfo } from "../../../domain/ports/auth.port";
 import type { HttpClientPort } from "../../../domain/ports/http-client.port";
 import { getAuthConfig } from "../../../shared/config";
 
@@ -11,6 +11,7 @@ interface UserApiResponse {
     };
     firstName: string;
 }
+
 interface CurrentUserApiResponse {
     id: {
         value: string;
@@ -81,11 +82,26 @@ export function authApiAdapter(httpClient: HttpClientPort): AuthPort {
     await httpClient.post(api_url, {});
   }
 
+  const logoutSingleDevice = async (sessionId: string): Promise<void> => {
+    const api_url = new URL(`api/auth/sessions/${sessionId}`, API_BASE_URL).href;
+    if(!api_url ) throw new Error("Invalid API URL");
+    await httpClient.del(api_url);
+  }
+
+  const getUserSessions = async (): Promise<{ success: boolean, sessions: SessionInfo[] }[]> => {
+    const api_url = new URL("api/auth/sessions", API_BASE_URL).href;
+    if(!api_url ) throw new Error("Invalid API URL");
+    const response = await httpClient.get<{ success: boolean, sessions: SessionInfo[] }[]>(api_url);
+    return response;
+  }
+
   return {
     register,
     login,
     logout,
     getCurrentUser,
-    logoutAll
+    logoutAll,
+    getUserSessions,
+    logoutSingleDevice
   }
 }

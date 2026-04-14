@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Button } from '../../ui/Button/Button';
+import { Input } from '../../ui/Input/Input';
+import { ErrorMessage } from '../../ui/ErrorMessage/ErrorMessage';
 import styles from './RegisterForm.module.css';
 import { useAuthActions } from '../../../hooks/useAuth';
 
@@ -57,73 +59,62 @@ export const RegisterForm = () => {
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
       <div className={styles.row}>
-        <input
+        <Input
           type="text"
           name="firstName"
           value={formData.firstName}
           onChange={handleChange}
           placeholder="Nombre"
-          className={styles.input}
           autoComplete="given-name"
           disabled={isLoading}
         />
-        <input
+        <Input
           type="text"
           name="lastName"
           value={formData.lastName}
           onChange={handleChange}
           placeholder="Apellido"
-          className={styles.input}
           autoComplete="family-name"
           disabled={isLoading}
         />
       </div>
 
-      <input
+      <Input
         type="email"
         name="email"
         value={formData.email}
         onChange={handleChange}
         placeholder="Correo electrónico"
-        className={styles.input}
         required
         autoComplete="email"
         disabled={isLoading}
       />
 
-      <input
+      <Input
         type="password"
         name="password"
         value={formData.password}
         onChange={handleChange}
         placeholder="Contraseña (mínimo 12 caracteres)"
-        className={styles.input}
         required
         autoComplete="new-password"
         minLength={12}
         disabled={isLoading}
       />
 
-      <input
+      <Input
         type="password"
         name="confirmPassword"
         value={formData.confirmPassword}
         onChange={handleChange}
         placeholder="Confirmar contraseña"
-        className={styles.input}
         required
         autoComplete="new-password"
         disabled={isLoading}
+        error={error && error === 'Las contraseñas no coinciden' ? 'true' : undefined}
       />
 
-      {error && (
-        <div className={styles.error} role="alert">
-          <svg className={styles.errorIcon} viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-          </svg>
-          {error}
-        </div>
-      )}
+      <ErrorMessage message={error} />
 
       <div className={styles.hint}>
         <svg viewBox="0 0 20 20" fill="currentColor">
@@ -136,7 +127,7 @@ export const RegisterForm = () => {
         type="submit" 
         variant="secondary" 
         isLoading={isLoading}
-        className={styles.submitBtn}
+        className={styles.fullWidthBtn}
       >
         Crear cuenta
       </Button>

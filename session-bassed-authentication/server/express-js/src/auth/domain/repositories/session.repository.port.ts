@@ -1,4 +1,14 @@
 // src/domain/repositories/session.repository.port.ts
+export interface SessionInfo {
+  sessionId: string;
+  userId: string;
+  ipAddress?: string;
+  userAgent?: string;
+  createdAt: Date;
+  expiresAt: Date;
+  isCurrent?: boolean;
+}
+
 export interface SessionRepositoryPort {
   /**
    * Crea una nueva sesión y retorna el sessionId
@@ -6,7 +16,8 @@ export interface SessionRepositoryPort {
   create(
     userId: string, 
     ipAddress?: string, 
-    userAgent?: string
+    userAgent?: string,
+    rememberMe?: boolean
   ): Promise<string>;
 
   /**
@@ -33,4 +44,9 @@ export interface SessionRepositoryPort {
    * Opcional: Limpia sesiones expiradas (puede llamarse desde un job)
    */
   cleanupExpiredSessions(): Promise<number>;
+
+  /* 
+  * Opcional: Retorna todas las sesiones activas de un usuario (para mostrar en el perfil)
+  */
+  getAllUserSessions(userId: string, currentSessionId?: string): Promise<SessionInfo[]>;
 }

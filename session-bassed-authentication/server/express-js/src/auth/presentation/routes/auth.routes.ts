@@ -52,5 +52,17 @@ export default function createAuthRoutes(
     (req, res, next) => controller.logoutAllDevices(req, res).catch(next)
   );
 
+  router.get('/sessions', 
+  authMiddleware(sessionRepo),
+  (req, res, next) => controller.getUserSessions(req, res).catch(next)
+);
+
+
+router.delete('/sessions/:sessionId', 
+  authMiddleware(sessionRepo),
+  // csrfMiddleware(),
+  (req, res, next) => controller.logoutSingleDevice(req, res).catch(next)
+);
+
   return router;
 }

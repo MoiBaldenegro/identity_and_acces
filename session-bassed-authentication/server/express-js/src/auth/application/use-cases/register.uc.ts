@@ -7,7 +7,6 @@ import { Email } from "../../domain/value-objects/email.vo.js";
 import { Password } from "../../domain/value-objects/password.vo.js";
 import { RegisterDtoType } from "../dtos/auth/register.dto.js";
 
-
 export class RegisterUseCase {
   constructor(
     private readonly userRepo: UserRepositoryPort,
@@ -39,7 +38,6 @@ export class RegisterUseCase {
 
     // Crear sesión inmediatamente después del registro (buena UX)
     const sessionId = await this.sessionRepo.create(createdUser.id.value, ip, userAgent);
-    console.log(createdUser.toPrimitives().id, sessionId, "MOISES EL CRACK");
 
     return { userId: createdUser.toPrimitives().id.value, sessionId };
   }

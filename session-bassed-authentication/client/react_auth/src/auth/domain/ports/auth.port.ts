@@ -9,6 +9,8 @@ export interface AuthPort {
   logout(): Promise<void>;
   getCurrentUser(): Promise<UserEntity | null>;
   logoutAll(): Promise<void>;
+  getUserSessions(): Promise<{ success: boolean, sessions: SessionInfo[] }[]>;
+  logoutSingleDevice(sessionId: string): Promise<void>;
 }
 
 export type RegisterData = {
@@ -21,4 +23,14 @@ export type RegisterData = {
 export type LoginData = {
   email: string;
   password: string;
+  rememberMe?: boolean;
 };
+
+export interface SessionInfo {
+  sessionId: string;
+  createdAt: string;
+  lastAccessedAt: string;
+  userAgent: string;
+  ipAddress: string;
+}
+

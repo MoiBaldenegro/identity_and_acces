@@ -1,4 +1,8 @@
 // Value Object para email
 export class EmailVO {
-  constructor(public readonly value: string) {}
+  public readonly value: string;
+  
+  constructor(value: string) {
+    this.value = value;
+  }
 }
