@@ -6,8 +6,7 @@ import { LogoutUseCase } from '../../application/use-cases/logout.uc.js';
 import { RegisterDto } from '../../application/dtos/auth/register.dto.js';
 import { LoginDto } from '../../application/dtos/auth/login.dto.js';
 import { GetCurrentUserUseCase } from '../../application/use-cases/get-current-user.uc.js';
-import { CSRF_COOKIE_NAME } from '../middlewares/csrf.middleware.js';
-import crypto from 'crypto';
+import { LogoutAllDevicesUseCase } from '../../application/use-cases/logout-all-devices-uc.js';
 
 
 export class AuthController {
@@ -15,7 +14,8 @@ export class AuthController {
     private registerUseCase: RegisterUseCase,
     private loginUseCase: LoginUseCase,
     private logoutUseCase: LogoutUseCase,
-    private getCurrentUserUseCase: GetCurrentUserUseCase
+    private getCurrentUserUseCase: GetCurrentUserUseCase,
+    private logoutAllDevicesUseCase: LogoutAllDevicesUseCase
   ) {}
 
   async register(req: Request, res: Response) {
@@ -92,6 +92,38 @@ async getCurrentUser(req: Request, res: Response) {
       lastName: user.lastName,
     }
   });
+}
+
+// src/presentation/controllers/auth.controller.ts
+
+async logoutAllDevices(req: Request, res: Response) {
+  const userId = (req as any).userId;
+  const currentSessionId = (req as any).sessionId;
+
+  if (!userId) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+
+  try {
+    await this.logoutAllDevicesUseCase.execute(userId, currentSessionId);
+
+  // Opcional: Cerrar también la sesión actual
+  // const currentSessionId = (req as any).sessionId;
+  // if (currentSessionId) {
+  //   await this.sessionRepo.delete(currentSessionId);   // borramos la actual también
+  // }
+
+  res.clearCookie('__Host-session');
+  res.clearCookie('__Host-csrf-token');
+
+  res.json({
+    success: true,
+    message: 'Se ha cerrado sesión en todos los dispositivos'
+  });
+   } catch (err) {
+    console.error('Error en logoutAllDevices:', err);
+    res.status(500).json({ success: false, message: 'Error al cerrar sesiones' });
+   }
 }
 
 // private setCsrfToken(res: Response) {

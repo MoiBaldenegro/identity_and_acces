@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import type { UserEntity } from "../../domain/entities/user.entity";
+import type { User } from "../../domain/entities/user.entity";
 import type { LoginData, RegisterData } from "../../domain/ports/auth.port";
 import { useAuthDependenciesStore } from "../../infrastructure/store/useAuthStore";
 import { useAuthStore } from "../store/useAuthStore";
@@ -7,8 +7,9 @@ import { useAuthStore } from "../store/useAuthStore";
 interface UseAuthActions {
   login: (data: LoginData) => Promise<void>;
   logout: () => Promise<void>;
-  user: UserEntity | null;
+  user: User | null;
   register: (userData: RegisterData) => Promise<void>;
+  logoutAll: () => Promise<void>;
 }
 
 export const useAuthActions = (): UseAuthActions => {
@@ -17,6 +18,7 @@ export const useAuthActions = (): UseAuthActions => {
   const _login = useAuthDependenciesStore((state) => state.auth.login);
   const _logout = useAuthDependenciesStore((state) => state.auth.logout);
   const _register = useAuthDependenciesStore((state) => state.auth.register);
+  const _logoutAll = useAuthDependenciesStore((state) => state.auth.logoutAll);
 
   const setAuth = useAuthStore((state) => state.setAuth);
   const clearAuth = useAuthStore((state) => state.clearAuth);
@@ -44,6 +46,16 @@ export const useAuthActions = (): UseAuthActions => {
     }
   };
 
+  const logoutAll = async () => {
+    try {
+      await _logoutAll.exec();
+    } catch (error) {
+      console.error('Error logging out from all sessions:', error);
+      throw error;
+    }
+  };
+
+
   const register = async (userData: RegisterData) => {
     try {
       await _register.exec(userData);
@@ -56,5 +68,5 @@ export const useAuthActions = (): UseAuthActions => {
     }
   };
 
-  return { login, logout, user, register };
+  return { login, logout, user, register, logoutAll };  
 };

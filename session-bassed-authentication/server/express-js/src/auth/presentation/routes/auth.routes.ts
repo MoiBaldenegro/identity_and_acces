@@ -45,5 +45,12 @@ export default function createAuthRoutes(
     }
   );
 
+  // Ruta para cerrar sesión en todos los dispositivos
+  router.post('/logout-all', 
+    authMiddleware(sessionRepo),
+    // csrfMiddleware(),                    // Protección CSRF
+    (req, res, next) => controller.logoutAllDevices(req, res).catch(next)
+  );
+
   return router;
 }

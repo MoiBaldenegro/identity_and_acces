@@ -16,13 +16,14 @@ export const useAuthCheck = () => {
     const checkAuth = async () => {
       try {
         const response = await getCurrentUser.exec();
-        const { user } = response;
-        if (user) {
-          setAuth(user);
+        //
+        if (response) {
+          setAuth(response);
         } else if (isAuthenticated) {
           clearAuth();
         }
-      } catch {
+      } catch (err) {
+        //
         if (isAuthenticated) {
           clearAuth();
         }

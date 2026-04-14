@@ -11,6 +11,7 @@ export interface UserEntity {
   getFullName: () => string;
   getUserId: () => string;
   getUserEmail: () => string;
+  toPrimitives: () => User;
 }
 
 export function createUser(id: string, email: string, firstName?: string, lastName?: string): UserEntity {
@@ -32,9 +33,12 @@ export function createUser(id: string, email: string, firstName?: string, lastNa
     const getUserId = () => user.id;
     const getUserEmail = () => user.email;
 
+    const toPrimitives = () => user;
+
     return {
         getFullName,
         getUserId,
-        getUserEmail
+        getUserEmail,
+        toPrimitives
     };
 }

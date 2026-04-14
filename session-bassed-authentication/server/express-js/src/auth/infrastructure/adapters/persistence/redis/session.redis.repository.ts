@@ -20,11 +20,18 @@ export class SessionRedisRepository implements SessionRepositoryPort {
       expiresAt: new Date(Date.now() + SESSION_TTL * 1000).toISOString(),
     };
 
+    const pipeline = redis.pipeline();
+
     await redis.setex(
       `${SESSION_PREFIX}${sessionId}`,
       SESSION_TTL,
       JSON.stringify(sessionData)
     );
+
+    // Guardamos el sessionId en el set del usuario
+    pipeline.sadd(`user_sessions:${userId}`, sessionId);
+
+    await pipeline.exec();
 
     return sessionId;
   }
@@ -66,11 +73,32 @@ async findById(sessionId: string): Promise<{ userId: string; expiresAt: Date } |
 
   return { userId: parsed.userId, expiresAt: newExpirationDate };
 }
-  async deleteAllForUser(userId: string): Promise<void> {
-    // En Redis puro es costoso escanear. En producción usaríamos un índice secundario o RedisJSON.
-    // Por ahora (para simplicidad y aprendizaje) lo dejamos como TODO con comentario:
-    // TODO: Implementar con Redis Set por usuario o usar KeyDB/Dragonfly para mejor soporte.
-    console.warn('deleteAllForUser not fully implemented in Redis adapter yet');
+  async deleteAllForUser(userId: string, excludeSessionId?: string): Promise<void> {
+    const userSessionsKey = `user_sessions:${userId}`;
+    const sessionIds = await redis.smembers(userSessionsKey);
+    if (sessionIds.length === 0) return;
+
+    const pipeline = redis.pipeline();
+    let deletedCount = 0;
+
+    // Borramos cada sesión
+    sessionIds.forEach(sessionId => {
+      if (sessionId === excludeSessionId) {
+      return;
+    }
+      pipeline.del(`${SESSION_PREFIX}${sessionId}`);
+    });
+
+    // Borramos el set completo y lo reconstruimos solo con la sesión actual (si existe)
+    pipeline.del(userSessionsKey);
+
+    if (excludeSessionId) {
+    pipeline.sadd(userSessionsKey, excludeSessionId);
+  }
+
+    await pipeline.exec();
+
+    console.log(`[Session] Cerradas ${sessionIds.length} sesiones para el usuario ${userId}`);
   }
 
   async cleanupExpiredSessions(): Promise<number> {

@@ -9,14 +9,16 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { isAuthenticated, isLoading, clearAuth } = useAuthStore();
+  //
 
   if (isLoading) {
     return <div className="loading">Cargando...</div>;
   }
 
   if (!isAuthenticated) {
+    //
     return <Navigate to="/login" replace />;
   }
-  
+
   return <>{children}</>;
 };

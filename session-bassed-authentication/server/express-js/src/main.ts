@@ -9,6 +9,7 @@ import createAuthRoutes from "./auth/presentation/routes/auth.routes.js";
 import { config } from "./auth/config/index.js";
 import { createServer } from "./auth/presentation/server.js";
 import { GetCurrentUserUseCase } from "./auth/application/use-cases/get-current-user.uc.js";
+import { LogoutAllDevicesUseCase } from "./auth/application/use-cases/logout-all-devices-uc.js";
 
 
 
@@ -38,12 +39,15 @@ async function bootstrap() {
 
     const getCurrentUserUseCase = new GetCurrentUserUseCase(userRepository);
 
+    const logoutAllDevicesUseCase = new LogoutAllDevicesUseCase(sessionRepository);
+
     // ==================== CONTROLLER ====================
     const authController = new AuthController(
       registerUseCase,
       loginUseCase,
       logoutUseCase,
-      getCurrentUserUseCase
+      getCurrentUserUseCase,
+      logoutAllDevicesUseCase
 
     );
 

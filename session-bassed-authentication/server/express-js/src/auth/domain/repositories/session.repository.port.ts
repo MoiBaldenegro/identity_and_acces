@@ -27,7 +27,7 @@ export interface SessionRepositoryPort {
    * Elimina TODAS las sesiones de un usuario
    * (protección contra Session Fixation + logout desde todos los dispositivos)
    */
-  deleteAllForUser(userId: string): Promise<void>;
+  deleteAllForUser(userId: string, excludeSessionId?: string): Promise<void>;
 
   /**
    * Opcional: Limpia sesiones expiradas (puede llamarse desde un job)

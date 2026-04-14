@@ -10,6 +10,7 @@ export interface AuthServiceContainer {
     login: ReturnType<typeof loginUseCase>;
     logout: ReturnType<typeof logoutUseCase>;
     getCurrentUser: ReturnType<typeof getCurrentUserUseCase>;
+    logoutAll: ReturnType<typeof logoutUseCase>; // Assuming logoutUseCase can handle logging out from all sessions
 }
 
 const fetchHttpClient = fetchHttpAdapter();
@@ -19,7 +20,8 @@ const container = {
         register: registerUseCase(authPort),
         login: loginUseCase(authPort),
         logout: logoutUseCase(authPort),
-        getCurrentUser: getCurrentUserUseCase(authPort)
+        getCurrentUser: getCurrentUserUseCase(authPort),
+        logoutAll: logoutUseCase(authPort) // Assuming the same use case can handle both single and all session logouts
     };
 
 

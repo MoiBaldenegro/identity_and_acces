@@ -75,10 +75,17 @@ export function authApiAdapter(httpClient: HttpClientPort): AuthPort {
     }
   }
 
+  const logoutAll = async (): Promise<void> => {
+    const api_url = new URL("api/auth/logout-all", API_BASE_URL).href;
+    if(!api_url ) throw new Error("Invalid API URL");
+    await httpClient.post(api_url, {});
+  }
+
   return {
     register,
     login,
     logout,
-    getCurrentUser
+    getCurrentUser,
+    logoutAll
   }
 }

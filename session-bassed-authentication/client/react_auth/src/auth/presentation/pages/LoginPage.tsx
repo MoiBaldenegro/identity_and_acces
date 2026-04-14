@@ -45,17 +45,14 @@ export const LoginPage = () => {
               <div className={styles.userInfo}>
                 <div className={styles.avatar}>
                   <span className={styles.avatarInitials}>
-                    {user.getFullName()
-                      .split(' ')
-                      .map(n => n[0])
-                      .join('')
-                      .toUpperCase()
-                      .slice(0, 2)}
+                    {user?.firstName
+                      ? `${user.firstName.charAt(0)}${user.lastName?.charAt(0) || ''}`
+                      : user?.email.charAt(0).toUpperCase() || '?'}
                   </span>
                 </div>
                 <div className={styles.userDetails}>
-                  <div className={styles.userName}>{user.getFullName()}</div>
-                  <div className={styles.userEmail}>{user.getUserEmail()}</div>
+                  <div className={styles.userName}>{user?.firstName} {user?.lastName}</div>
+                  <div className={styles.userEmail}>{user?.email}</div>
                 </div>
               </div>
               <div className={styles.status}>

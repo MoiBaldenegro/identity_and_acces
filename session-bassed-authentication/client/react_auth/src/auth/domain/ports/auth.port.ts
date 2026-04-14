@@ -8,6 +8,7 @@ export interface AuthPort {
   login(data: LoginData): Promise<UserEntity>;
   logout(): Promise<void>;
   getCurrentUser(): Promise<UserEntity | null>;
+  logoutAll(): Promise<void>;
 }
 
 export type RegisterData = {

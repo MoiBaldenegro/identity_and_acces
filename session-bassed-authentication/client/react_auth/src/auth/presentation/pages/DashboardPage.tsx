@@ -3,16 +3,29 @@ import { useAuthActions } from '../hooks/useAuth';
 import styles from './styles/Dashboard.module.css';
 
 export const DashboardPage = () => {
-  const { user, logout } = useAuthActions();
-  const userName = user?.getFullName() || 'Usuario';
-  const userId = user?.getUserId() || 'N/A';
-  const userEmail = user?.getUserEmail() || '';
+  const { user, logout, logoutAll } = useAuthActions();
+  const userName = user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : 'Usuario';
+  const userId = user?.id|| 'N/A';
+  const userEmail = user?.email || '';
   const initials = userName
     .split(' ')
     .map(n => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
+
+    const handleLogoutAll = async () => {
+    if (!confirm('¿Estás seguro de cerrar sesión en TODOS los dispositivos?')) {
+      return;
+    }
+
+    try {
+      await logoutAll();
+      // No hace falta redirigir porque logoutAll ya limpia todo
+    } catch (error) {
+      alert('Error al cerrar sesiones');
+    }
+  };
 
   return (
     <div className={styles.app}>
@@ -29,6 +42,9 @@ export const DashboardPage = () => {
         </div>
         <Button variant="secondary" onClick={logout}>
           Cerrar sesión
+        </Button>
+        <Button variant="secondary" onClick={handleLogoutAll}>
+          Cerrar sesión en todos los dispositivos
         </Button>
       </header>
 
