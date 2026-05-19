@@ -77,5 +77,3 @@
 └── README.md
 
 ---
-**NOTA:**
-La estructura de carpetas y archivos ya fue generada para práctica de comandos de consola. No es necesario seguir creando archivos o carpetas manualmente. Puedes continuar con el desarrollo del proyecto a partir de esta base.
